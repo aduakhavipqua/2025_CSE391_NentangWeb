@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quản Lý Công Việc</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      padding: 60px 20px;
+      margin: 0;
+    }
+
+    .todo-container {
+      background-color: #fff;
+      padding: 30px 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+    }
+
+    .input-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #todo-input {
+      flex-grow: 1;
+      padding: 10px 14px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    #todo-input:focus {
+      border-color: #007bff;
+    }
+
+    #add-button {
+      padding: 10px 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    #add-button:hover {
+      background-color: #0056b3;
+    }
+
+    #todo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #todo-list li {
+      background-color: #f9f9f9;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    #todo-list li span {
+      flex-grow: 1;
+      word-break: break-word;
+    }
+
+    #todo-list input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    #todo-list button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .edit-btn {
+      background-color: #ffc107;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h1>Quản Lý Công Việc</h1>
+
+    <div class="input-section">
+      <input type="text" id="todo-input" placeholder="Nhập công việc mới..."/>
+      <button id="add-button">Thêm công việc</button>
+    </div>
+
+    <ul id="todo-list">
+      <!-- Danh sách công việc hiện ở đây -->
+    </ul>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    // Load dữ liệu từ localStorage
+    window.onload = function () {
+      const savedTasks = localStorage.getItem("tasks");
+      if (savedTasks) {
+        tasks = JSON.parse(savedTasks);
+        tasks.forEach(task => renderTask(task));
+      }
+    };
+
+    // Lưu vào localStorage
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    // Thêm công việc mới
+    function addTask() {
+      const input = document.getElementById("todo-input");
+      const taskText = input.value.trim();
+
+      if (taskText === "") {
+        alert("Vui lòng nhập nội dung công việc!");
+        return;
+      }
+
+      const newTask = {
+        text: taskText,
+        completed: false
+      };
+
+      tasks.push(newTask);
+      saveTasks();
+      renderTask(newTask);
+      input.value = "";
+    }
+
+    // Render công việc ra UI
+    function renderTask(task) {
+      const li = document.createElement("li");
+
+      // Checkbox
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = task.completed;
+
+      const taskSpan = document.createElement("span");
+      taskSpan.textContent = task.text;
+      taskSpan.style.textDecoration = task.completed ? "line-through" : "none";
+
+      checkbox.addEventListener("change", function () {
+        task.completed = checkbox.checked;
+        taskSpan.style.textDecoration = task.completed ? "line-through" : "none";
+        saveTasks();
+      });
+
+      // Nút Sửa
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Sửa";
+      editBtn.className = "edit-btn";
+      editBtn.addEventListener("click", function () {
+        const newText = prompt("Chỉnh sửa công việc:", task.text);
+        if (newText && newText.trim() !== "") {
+          task.text = newText.trim();
+          taskSpan.textContent = task.text;
+          saveTasks();
+        }
+      });
+
+      // Nút Xóa
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Xóa";
+      deleteBtn.className = "delete-btn";
+      deleteBtn.addEventListener("click", function () {
+        li.remove();
+        tasks = tasks.filter(t => t !== task);
+        saveTasks();
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(taskSpan);
+      li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
+      document.getElementById("todo-list").appendChild(li);
+    }
+
+    // Sự kiện nút thêm
+    document.getElementById("add-button").addEventListener("click", addTask);
+  </script>
+</body>
+</html>
